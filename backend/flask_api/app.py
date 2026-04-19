@@ -3,11 +3,17 @@ import joblib
 import numpy as np
 import pandas as pd
 from pathlib import Path
+import os
 
 app = Flask(__name__)
 
 MODEL_PATH = Path(__file__).resolve().parent / "emp_perf_model.joblib"
-model = joblib.load(MODEL_PATH) if MODEL_PATH.exists() else None
+
+try:
+    model = joblib.load(MODEL_PATH) if MODEL_PATH.exists() else None
+except Exception as e:
+    print(f"[WARN] Failed to load model: {e}")
+    model = None
 
 
 def _to_float(value, default=0.0):
@@ -18,8 +24,6 @@ def _to_float(value, default=0.0):
 
 
 def _prepare_payload(data):
-    # Model was trained with engineered features that are not directly sent by the UI.
-    # Build those fields from available form inputs and keep only expected columns.
     payload = dict(data or {})
 
     payload.setdefault("Efficiency", _to_float(payload.get("Projects_Completed")))
@@ -43,6 +47,7 @@ def _prepare_payload(data):
         return {feature: payload.get(feature, 0) for feature in feature_order}
     return payload
 
+
 @app.route("/predict", methods=["POST"])
 def predict():
     if model is None:
@@ -59,5 +64,12 @@ def predict():
 
     return jsonify({"prediction": int(prediction)})
 
+
+@app.route("/health", methods=["GET"])
+def health():
+    return jsonify({"status": "ok", "model_loaded": model is not None})
+
+
 if __name__ == "__main__":
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=False)
