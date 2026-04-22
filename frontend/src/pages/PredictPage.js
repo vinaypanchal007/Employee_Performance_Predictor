@@ -6,150 +6,97 @@ const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "http://localhost:500
 const numberFields = [
   "Age",
   "Experience_Years",
-  "Performance_Score",
-  "Attendance_Rate",
+  "Projects_Completed",
+  "Certifications",
+  "Work_Life_Balance",
+  "Job_Satisfaction",
+  "Manager_Rating",
+  "Laptop_Issue_Count",
+  "Last_Promotion_Years",
+  "Absenteeism_Days",
 ];
 
-const stringFields = [
-  "Department",
-  "Job_Title",
-  "Education",
-  "Employment_Type",
-];
+const dropdownOptions = {
+  Gender: ["Male", "Female", "Other"],
+  City: ["Delhi", "Kolkata", "Chennai", "Pune", "Mumbai", "Hyderabad", "Bengaluru"],
+  Education_Level: ["Graduate", "Post Graduate", "Diploma", "PhD"],
+  Department: ["Sales", "Operations", "Analytics", "Finance", "IT", "HR"],
+};
 
-export default function PredictPage() {
-  const [formData, setFormData] = useState({
-    Age: "",
-    Experience_Years: "",
-    Performance_Score: "",
-    Attendance_Rate: "",
-    Department: "",
-    Job_Title: "",
-    Education: "",
-    Employment_Type: "",
-  });
-
-  const [prediction, setPrediction] = useState(null);
-  const [error, setError] = useState(null);
+function PredictPage() {
+  const [form, setForm] = useState({});
+  const [result, setResult] = useState(null);
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError(null);
-    setPrediction(null);
+  const handleSubmit = async () => {
     setLoading(true);
-
     try {
-      const response = await axios.post(`${API_BASE_URL}/predict`, formData);
-      setPrediction(response.data);
+      setError("");
+      const res = await axios.post(`${API_BASE_URL}/api/predict`, form);
+      setResult(res.data.prediction);
     } catch (err) {
-      setError(
-        err.response?.data?.detail ||
-          err.message ||
-          "An error occurred while making the prediction"
-      );
+      setResult(null);
+      setError("Unable to connect to prediction service. Check backend servers.");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleReset = () => {
-    setFormData({
-      Age: "",
-      Experience_Years: "",
-      Performance_Score: "",
-      Attendance_Rate: "",
-      Department: "",
-      Job_Title: "",
-      Education: "",
-      Employment_Type: "",
-    });
-    setPrediction(null);
-    setError(null);
-  };
-
   return (
-    <div className="predict-container">
-      <h1>Employee Performance Prediction</h1>
+    <section className="page">
+      <h2>Performance Prediction</h2>
+      <p className="subtext">Fill in the employee details and run prediction.</p>
 
-      <form onSubmit={handleSubmit}>
-        <div className="form-row">
-          {numberFields.map((field) => (
-            <div key={field} className="form-group">
-              <label htmlFor={field}>{field.replace(/_/g, " ")}:</label>
+      <div className="form">
+        <div className="section">
+          {Object.keys(dropdownOptions).map((key) => (
+            <div className="form-group" key={key}>
+              <label className="label">{key.replaceAll("_", " ")}</label>
+              <select name={key} className="input" onChange={handleChange}>
+                <option value="">Select {key.replaceAll("_", " ")}</option>
+                {dropdownOptions[key].map((option) => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </select>
+            </div>
+          ))}
+        </div>
+
+        <div className="section">
+          {numberFields.map((key) => (
+            <div className="form-group" key={key}>
+              <label className="label">{key.replaceAll("_", " ")}</label>
               <input
                 type="number"
-                id={field}
-                name={field}
-                value={formData[field]}
+                name={key}
+                placeholder={`Enter ${key.replaceAll("_", " ")}`}
+                className="input"
                 onChange={handleChange}
-                placeholder={`Enter ${field.replace(/_/g, " ").toLowerCase()}`}
-                step="0.01"
-                required
               />
             </div>
           ))}
         </div>
 
-        <div className="form-row">
-          {stringFields.map((field) => (
-            <div key={field} className="form-group">
-              <label htmlFor={field}>{field.replace(/_/g, " ")}:</label>
-              <input
-                type="text"
-                id={field}
-                name={field}
-                value={formData[field]}
-                onChange={handleChange}
-                placeholder={`Enter ${field.replace(/_/g, " ").toLowerCase()}`}
-                required
-              />
-            </div>
-          ))}
-        </div>
+        <button className="button" onClick={handleSubmit} disabled={loading}>
+          {loading ? "Predicting..." : "Predict"}
+        </button>
+      </div>
 
-        <div className="form-actions">
-          <button type="submit" disabled={loading}>
-            {loading ? "Loading..." : "Predict"}
-          </button>
-          <button type="button" onClick={handleReset}>
-            Reset
-          </button>
-        </div>
-      </form>
-
-      {error && <div className="error-message">{error}</div>}
-
-      {prediction && (
-        <div className="prediction-result">
-          <h2>Prediction Result</h2>
-          <p>
-            <strong>Promotion Eligibility:</strong>{" "}
-            {prediction.promotion_eligibility}
-          </p>
-          <p>
-            <strong>Confidence Score:</strong> {prediction.confidence_score}%
-          </p>
-          {prediction.recommendations && (
-            <div>
-              <strong>Recommendations:</strong>
-              <ul>
-                {prediction.recommendations.map((rec, index) => (
-                  <li key={index}>{rec}</li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </div>
+      {result !== null && (
+        <h3 className="status success">
+          Prediction: {result === 0 ? "Low" : result === 1 ? "Average" : "High"}
+        </h3>
       )}
-    </div>
+      {error && <h3 className="status error">{error}</h3>}
+    </section>
   );
 }
+
+export default PredictPage;
