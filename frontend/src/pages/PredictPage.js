@@ -1,7 +1,8 @@
 import { useState } from "react";
 import axios from "axios";
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "http://localhost:5000";
+const API_BASE_URL =
+  process.env.REACT_APP_API_BASE_URL || "http://localhost:5000";
 
 const numberFields = [
   "Age",
@@ -35,13 +36,37 @@ function PredictPage() {
 
   const handleSubmit = async () => {
     setLoading(true);
+    setError("");
+    setResult(null);
+
     try {
-      setError("");
       const res = await axios.post(`${API_BASE_URL}/api/predict`, form);
-      setResult(res.data.prediction);
+
+      console.log("API RESPONSE:", res?.data);
+
+      const prediction =
+        res?.data?.prediction ??
+        res?.data?.result ??
+        res?.data?.output;
+
+      if (prediction === undefined || prediction === null) {
+        throw new Error("Invalid response structure");
+      }
+
+      setResult(prediction);
     } catch (err) {
-      setResult(null);
-      setError("Unable to connect to prediction service. Check backend servers.");
+      console.error("API ERROR:", err);
+
+      if (err.response) {
+        setError(
+          err.response.data?.message ||
+            "Server error. Backend responded with an issue."
+        );
+      } else if (err.request) {
+        setError("Backend not reachable. Check deployment URL.");
+      } else {
+        setError("Unexpected error occurred.");
+      }
     } finally {
       setLoading(false);
     }
@@ -50,15 +75,25 @@ function PredictPage() {
   return (
     <section className="page">
       <h2>Performance Prediction</h2>
-      <p className="subtext">Fill in the employee details and run prediction.</p>
+      <p className="subtext">
+        Fill in the employee details and run prediction.
+      </p>
 
       <div className="form">
         <div className="section">
           {Object.keys(dropdownOptions).map((key) => (
             <div className="form-group" key={key}>
-              <label className="label">{key.replaceAll("_", " ")}</label>
-              <select name={key} className="input" onChange={handleChange}>
-                <option value="">Select {key.replaceAll("_", " ")}</option>
+              <label className="label">
+                {key.replaceAll("_", " ")}
+              </label>
+              <select
+                name={key}
+                className="input"
+                onChange={handleChange}
+              >
+                <option value="">
+                  Select {key.replaceAll("_", " ")}
+                </option>
                 {dropdownOptions[key].map((option) => (
                   <option key={option} value={option}>
                     {option}
@@ -72,7 +107,9 @@ function PredictPage() {
         <div className="section">
           {numberFields.map((key) => (
             <div className="form-group" key={key}>
-              <label className="label">{key.replaceAll("_", " ")}</label>
+              <label className="label">
+                {key.replaceAll("_", " ")}
+              </label>
               <input
                 type="number"
                 name={key}
@@ -84,16 +121,26 @@ function PredictPage() {
           ))}
         </div>
 
-        <button className="button" onClick={handleSubmit} disabled={loading}>
+        <button
+          className="button"
+          onClick={handleSubmit}
+          disabled={loading}
+        >
           {loading ? "Predicting..." : "Predict"}
         </button>
       </div>
 
       {result !== null && (
         <h3 className="status success">
-          Prediction: {result === 0 ? "Low" : result === 1 ? "Average" : "High"}
+          Prediction:{" "}
+          {result === 0
+            ? "Low Performer"
+            : result === 1
+            ? "Average Performer"
+            : "High Performer"}
         </h3>
       )}
+
       {error && <h3 className="status error">{error}</h3>}
     </section>
   );
