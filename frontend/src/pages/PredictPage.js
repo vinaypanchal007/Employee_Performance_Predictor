@@ -39,23 +39,14 @@ function PredictPage() {
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
-    setForm({
-      ...form,
-      [e.target.name]: e.target.value,
-    });
+    setForm({ ...form, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async () => {
     setLoading(true);
-
     try {
       setError("");
-
-      const res = await axios.post(
-        `${API_BASE_URL}/api/predict`,
-        form
-      );
-
+      const res = await axios.post(${API_BASE_URL}/api/predict, form);
       setResult(res.data.prediction);
     } catch (err) {
       setResult(null);
@@ -111,7 +102,7 @@ function PredictPage() {
               <input
                 type="number"
                 name={key}
-                placeholder={`Enter ${key.replaceAll("_", " ")}`}
+                placeholder={Enter ${key.replaceAll("_", " ")}}
                 className="input"
                 onChange={handleChange}
               />
@@ -139,9 +130,7 @@ function PredictPage() {
         </h3>
       )}
 
-      {error && (
-        <h3 className="status error">{error}</h3>
-      )}
+      {error && <h3 className="status error">{error}</h3>}
     </section>
   );
 }
