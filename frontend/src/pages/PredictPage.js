@@ -19,7 +19,15 @@ const numberFields = [
 
 const dropdownOptions = {
   Gender: ["Male", "Female", "Other"],
-  City: ["Delhi", "Kolkata", "Chennai", "Pune", "Mumbai", "Hyderabad", "Bengaluru"],
+  City: [
+    "Delhi",
+    "Kolkata",
+    "Chennai",
+    "Pune",
+    "Mumbai",
+    "Hyderabad",
+    "Bengaluru",
+  ],
   Education_Level: ["Graduate", "Post Graduate", "Diploma", "PhD"],
   Department: ["Sales", "Operations", "Analytics", "Finance", "IT", "HR"],
 };
@@ -31,42 +39,29 @@ function PredictPage() {
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    setForm({
+      ...form,
+      [e.target.name]: e.target.value,
+    });
   };
 
   const handleSubmit = async () => {
     setLoading(true);
-    setError("");
-    setResult(null);
 
     try {
-      const res = await axios.post(`${API_BASE_URL}/api/predict`, form);
+      setError("");
 
-      console.log("API RESPONSE:", res?.data);
+      const res = await axios.post(
+        `${API_BASE_URL}/api/predict`,
+        form
+      );
 
-      const prediction =
-        res?.data?.prediction ??
-        res?.data?.result ??
-        res?.data?.output;
-
-      if (prediction === undefined || prediction === null) {
-        throw new Error("Invalid response structure");
-      }
-
-      setResult(prediction);
+      setResult(res.data.prediction);
     } catch (err) {
-      console.error("API ERROR:", err);
-
-      if (err.response) {
-        setError(
-          err.response.data?.message ||
-            "Server error. Backend responded with an issue."
-        );
-      } else if (err.request) {
-        setError("Backend not reachable. Check deployment URL.");
-      } else {
-        setError("Unexpected error occurred.");
-      }
+      setResult(null);
+      setError(
+        "Unable to connect to prediction service. Check backend servers."
+      );
     } finally {
       setLoading(false);
     }
@@ -86,6 +81,7 @@ function PredictPage() {
               <label className="label">
                 {key.replaceAll("_", " ")}
               </label>
+
               <select
                 name={key}
                 className="input"
@@ -94,6 +90,7 @@ function PredictPage() {
                 <option value="">
                   Select {key.replaceAll("_", " ")}
                 </option>
+
                 {dropdownOptions[key].map((option) => (
                   <option key={option} value={option}>
                     {option}
@@ -110,6 +107,7 @@ function PredictPage() {
               <label className="label">
                 {key.replaceAll("_", " ")}
               </label>
+
               <input
                 type="number"
                 name={key}
@@ -134,14 +132,16 @@ function PredictPage() {
         <h3 className="status success">
           Prediction:{" "}
           {result === 0
-            ? "Low Performer"
+            ? "Low"
             : result === 1
-            ? "Average Performer"
-            : "High Performer"}
+            ? "Average"
+            : "High"}
         </h3>
       )}
 
-      {error && <h3 className="status error">{error}</h3>}
+      {error && (
+        <h3 className="status error">{error}</h3>
+      )}
     </section>
   );
 }
