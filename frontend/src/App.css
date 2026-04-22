@@ -53,9 +53,9 @@
   transform: scale(1.08);
 }
 
-/* Hidden by default on desktop */
 .nav-overlay {
   display: none;
+  pointer-events: none;
 }
 
 .drawer-close {
@@ -241,9 +241,6 @@
   text-decoration: none;
 }
 
-/* ============================================
-   MOBILE RESPONSIVE — 900px and below
-   ============================================ */
 @media (max-width: 900px) {
   .app-content {
     padding: 20px 16px 28px;
@@ -277,14 +274,11 @@
     align-items: flex-start;
   }
 
-  /* Show hamburger button */
   .menu-toggle {
     display: inline-flex;
   }
 
-  /* ── DRAWER: hidden off-screen to the RIGHT by default ── */
   .nav-links {
-    /* Layout */
     position: fixed;
     top: 0;
     right: 0;
@@ -294,32 +288,22 @@
     flex-wrap: nowrap;
     gap: 10px;
     padding: 80px 16px 20px;
-
-    /* Appearance */
     background: #0f172a;
     border-left: 1px solid #1e293b;
     box-shadow: -10px 0 30px rgba(0, 0, 0, 0.4);
-
-    /* Hidden state — pushed fully off screen */
     transform: translateX(100%);
-    visibility: hidden;        /* ← KEY FIX: prevents it being tappable when hidden */
-    
-    /* Animation */
+    visibility: hidden;
     transition: transform 0.3s ease, visibility 0s linear 0.3s;
-    will-change: transform;    /* ← KEY FIX: forces GPU layer, fixes Vercel prod bug */
-
-    /* Stack above overlay */
+    will-change: transform;
     z-index: 30;
   }
 
-  /* ── DRAWER OPEN STATE ── */
   .nav-links.open {
     transform: translateX(0);
-    visibility: visible;       /* ← show immediately when opening */
+    visibility: visible;
     transition: transform 0.3s ease, visibility 0s linear 0s;
   }
 
-  /* Show the X close button inside drawer */
   .drawer-close {
     display: inline-flex;
     align-items: center;
@@ -335,7 +319,6 @@
     margin-bottom: 8px;
   }
 
-  /* ── OVERLAY: covers page behind drawer ── */
   .nav-overlay {
     display: block;
     position: fixed;
@@ -343,16 +326,12 @@
     background: rgba(2, 6, 23, 0.55);
     backdrop-filter: blur(2px);
     z-index: 20;
-
-    /* Hidden state */
     opacity: 0;
-    visibility: hidden;        /* ← KEY FIX: not clickable when invisible */
+    visibility: hidden;
     pointer-events: none;
-
     transition: opacity 0.3s ease, visibility 0s linear 0.3s;
   }
 
-  /* ── OVERLAY OPEN STATE ── */
   .nav-overlay.open {
     opacity: 1;
     visibility: visible;
@@ -367,9 +346,6 @@
   }
 }
 
-/* ============================================
-   SMALL MOBILE — 600px and below
-   ============================================ */
 @media (max-width: 600px) {
   .brand {
     font-size: 16px;
@@ -412,10 +388,6 @@
   }
 }
 
-/* ============================================
-   PREVENT BODY SCROLL when drawer is open
-   (add/remove this class via JS on <body>)
-   ============================================ */
 body.drawer-open {
   overflow: hidden;
 }
