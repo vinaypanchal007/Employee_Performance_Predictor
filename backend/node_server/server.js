@@ -9,16 +9,25 @@ const FLASK_API_URL = process.env.FLASK_API_URL || "http://127.0.0.1:5000";
 app.use(express.json());
 app.use(cors());
 
+app.get("/health", (req, res) => {
+  res.json({ status: "ok", flask_url: FLASK_API_URL });
+});
+
 app.post("/api/predict", async (req, res) => {
   try {
-    const response = await axios.post(`${FLASK_API_URL}/predict`, req.body);
+    const response = await axios.post(`${FLASK_API_URL}/predict`, req.body, {
+      timeout: 10000,
+    });
     res.json(response.data);
   } catch (error) {
-    console.error(error.message);
-    res.status(500).json({ error: "Flask API error" });
+    const status = error.response?.status || 500;
+    const message = error.response?.data || error.message;
+    console.error(`[Flask Error] ${status}:`, message);
+    res.status(status).json({ error: "Flask API error", details: message });
   }
 });
 
 app.listen(PORT, () => {
   console.log(`Node server running on port ${PORT}`);
+  console.log(`Forwarding to Flask at: ${FLASK_API_URL}`);
 });
