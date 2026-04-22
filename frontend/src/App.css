@@ -4,12 +4,14 @@
   flex-direction: column;
   background: #0b1220;
   color: #e2e8f0;
+  overflow-x: clip;
 }
 
 .navbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 16px;
   padding: 16px 28px;
   border-bottom: 1px solid #1e293b;
   background: rgba(15, 23, 42, 0.9);
@@ -23,12 +25,15 @@
   font-weight: 700;
   letter-spacing: 0.2px;
   font-size: 18px;
+  flex: 1;
+  min-width: 0;
 }
 
 .nav-links {
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
+  max-width: 100%;
 }
 
 .menu-toggle {
@@ -274,7 +279,8 @@
   }
 
   .menu-toggle {
-    display: inline-block;
+    display: inline-flex;
+    flex: 0 0 auto;
   }
 
   .nav-links {
@@ -294,6 +300,8 @@
     flex-direction: column;
     gap: 10px;
     flex-wrap: nowrap;
+    overflow-y: auto;
+    overscroll-behavior: contain;
   }
 
   .drawer-close {
@@ -342,6 +350,8 @@
 @media (max-width: 600px) {
   .brand {
     font-size: 16px;
+    line-height: 1.25;
+    padding-right: 8px;
   }
 
   .nav-links {

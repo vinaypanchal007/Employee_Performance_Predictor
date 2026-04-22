@@ -4,7 +4,14 @@
   padding: 0;
 }
 
+html,
 body {
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   background: #0b1220;
+  overflow-x: hidden;
+  width: 100%;
+}
+
+body.menu-open {
+  overflow: hidden;
 }
