@@ -1,0 +1,25 @@
+services:
+  # ── Flask ML API ──────────────────────────────────────────────
+  - type: web
+    name: flask-api
+    runtime: python
+    rootDir: backend/flask_api
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --workers 2
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+
+  # ── Node Proxy Server ─────────────────────────────────────────
+  - type: web
+    name: node-server
+    runtime: node
+    rootDir: backend/node_server
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: NODE_VERSION
+        value: 18.0.0
+      - key: FLASK_API_URL
+        # ⚠️  Replace this with your actual Flask service URL from Render dashboard
+        value: https://flask-api.onrender.com
