@@ -4,7 +4,7 @@ const cors = require("cors");
 
 const app = express();
 const PORT = process.env.PORT || 4000;
-const FLASK_API_URL = process.env.FLASK_API_URL || "http://127.0.0.1:5000";
+const FLASK_API_URL = "https://flask-api-rifk.onrender.com/";
 
 app.use(express.json());
 app.use(cors());
